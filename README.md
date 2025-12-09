@@ -63,7 +63,9 @@ kubectl -n oke-gcp-ns create sa oke-gcp-sa;
 
 We will try to run the commands with GCP CLI, but you can always try to do it in the console as well:
 
-## 1. GCP recommends to use a dedicated project to manage workload identity pools and providers, so lets create a GCP project :
+## 1. create a GCP project
+
+GCP recommends to use a dedicated project to manage workload identity pools and providers, so lets create a GCP project :
 
 ```
    gcloud projects create oke-oidc-gcp;
@@ -71,7 +73,9 @@ We will try to run the commands with GCP CLI, but you can always try to do it in
 
 Retain the PROJECT_NUMBER.
 
-## 2. Enable the IAM, Resource Manager, Service Account Credentials, and Security Token Service APIs.
+## 2. enable APIs for the project
+
+Enable the IAM, Resource Manager, Service Account Credentials, and Security Token Service APIs.
 
    Dont forget verifing that billing is enabled for your oke-oidc-gcp Google Cloud project.
 
