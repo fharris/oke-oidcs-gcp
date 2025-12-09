@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-workload
+  namespace: default
+  labels:
+    app: gcp-workload
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gcp-workload
+  template:
+    metadata:
+      labels:
+        app: gcp-workload
+    spec:
+      serviceAccountName: oke-sa
+      containers:
+      - name: app
+        image: google/cloud-sdk:slim
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # Configure gcloud to use the OIDC token
+          gcloud config set auth/credential_file_override /var/run/secrets/tokens/gcp-ksa
+          
+          # Keep container running
+          while true; do
+            echo "Authenticated with GCP using OIDC token"
+            gcloud auth list
+            sleep 60
+          done
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/run/secrets/tokens/gcp-ksa
+        - name: CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE
+          value: /var/run/secrets/tokens/gcp-ksa
+        volumeMounts:
+        - name: gcp-token
+          mountPath: /var/run/secrets/tokens
+          readOnly: true
+      volumes:
+      - name: gcp-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: gcp-ksa
+              expirationSeconds: 3600
+              audience: sts.googleapis.com
