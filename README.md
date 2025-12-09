@@ -170,7 +170,7 @@ gcloud iam workload-identity-pools create-cred-config \
     --credential-source-type=text \
     --sts-location=global \
     --output-file=credential-configuration.json
-``
+```
 
 Now, lets create some resources in GCP:
 
