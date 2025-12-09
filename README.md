@@ -56,11 +56,22 @@ You should see something like the image below:
 
 <img width="1557" height="370" alt="image" src="https://github.com/user-attachments/assets/fa219535-901a481f93c1-f03fd59be68c" />
 
+<img width="1557" height="370" alt="image" src="https://github.com/user-attachments/assets/6a2eb2c3-f8e0-48c3-8fdb-f1abad078cea" />
+
+
 retain the **open-id-connect-discovery-endpoint** . We will need it later.
 
 Documentation: [OpenID Connect Discovery - Oracle Cloud Infrastructure Docs](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengOpenIDConnect-Discovery.htm)
 
 
+## 2 - Prepare GCP resources
 
+1. Create a GCP project
+
+```
+   gcloud projects create oke-oidc-gcp;
+   gcloud projects create oke-oidc-gcp;
+```
+   
 
 
