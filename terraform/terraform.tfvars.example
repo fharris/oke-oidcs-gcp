@@ -1,0 +1,11 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+gcp_project_id                       = "your-gcp-project-id"
+gcp_region                           = "us-central1"
+oke_oidc_issuer_url                  = "https://your-region.oraclecloud.com/v1/kubernetes/your-cluster-ocid/token"
+workload_identity_pool_id            = "oke-workload-pool"
+workload_identity_pool_display_name  = "OKE Workload Identity Pool"
+workload_identity_provider_id        = "oke-oidc-provider"
+gcp_service_account_id               = "oke-workload-sa"
+k8s_namespace                        = "default"
+k8s_service_account_name             = "oke-sa"
