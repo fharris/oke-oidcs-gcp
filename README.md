@@ -111,11 +111,50 @@ gcloud services enable iam.googleapis.com cloudresourcemanager.googleapis.com ia
 
 4. Configure Workload Identity Federation
 
-# Create workload identity pool
+ - Create workload identity pool
 
 ```
 gcloud iam workload-identity-pools create "oke-pool" \
   --location="global" \
   --description="Pool for OKE workloads"
 ```
+
+
+- Create identity provider
+
+```
+gcloud iam workload-identity-pools providers create-oidc "oke-provider" \
+  --location="global" \
+  --workload-identity-pool="oke-pool" \
+  --issuer-uri="https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/id9y6mi8tcky/b/oidc/o/42180282-ab82-48c3-bf01-5faea66725c4" \
+  --attribute-mapping="google.subject=assertion.sub"
+```
+
+- Create Service Account
+
+```
+gcloud iam service-accounts create oke-workload-sa \
+  --description="Service account for OKE Workloads to access GCP Object Storage" \
+  --display-name="OKE Workload Service Account"
+```
+
+The following command grants the service account named oke-workload-sa the Storage Object Viewer role on the entire oke-oidc-gcp project. 
+
+```
+  gcloud projects add-iam-policy-binding projects/oke-oidc-gcp \
+  --member="serviceAccount:oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com" \
+  --role="roles/storage.objectViewer"
+```
+
+This command grants a specific Kubernetes service account (identified by its unique Workload Identity Pool member string) the permission to impersonate a particular Google Cloud service account ( oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com ). The role granted, roles/iam.workloadIdentityUser , is specifically designed for this impersonation, allowing applications running in the Kubernetes cluster (using that Kubernetes service account) to effectively "act as" the Google Cloud service account and access Google Cloud resources based on the Google Cloud service account's permissions, without needing traditional service account keys. The --condition=None explicitly states that no additional conditions are placed on this binding.
+
+```
+gcloud iam service-accounts add-iam-policy-binding \
+  oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com \
+  --role="roles/iam.workloadIdentityUser" \
+  --member=principal://iam.googleapis.com/projects/647206516842/locations/global/workloadIdentityPools/oke-pool/subject/system:serviceaccount:oke-gcp-ns:oke-gcp-sa \
+  --condition=None
+```
+
+
 
