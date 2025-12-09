@@ -187,7 +187,6 @@ kubectl create configmap gcp-credential-configuration \
   --namespace oke-gcp-ns
 ```
 
-Create the following pod
 
 The following pod will use the  ServiceAccount oke-gcp-sa and ConfigMap gcp-credential-configuration to authenticate to Google Cloud:
 
