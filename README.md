@@ -4,7 +4,9 @@ Authorizing Pods in OKE to Access GCP Resources Using OpenID Connect (OIDC) Disc
 
 # 1. Prepare OKE to support OIDC Discovery
 
-## 1.1 - In the OKE Documentation you can see how to create a cluster with OIDC Discovery enabled. But you can also provision a cluster without it and update it once is provisioned. 
+## 1.1 - Enable OIDC discovery
+
+In the OKE Documentation you can see how to create a cluster with OIDC Discovery enabled. But you can also provision a cluster without it and update it once is provisioned. 
 
 Like this if you want to do it in the console:
 
@@ -48,7 +50,9 @@ Documentation: [OpenID Connect Discovery - Oracle Cloud Infrastructure Docs](htt
 
 
 
-## 1.2 - Create a namespace and a service account for the OKE workloads:
+## 1.2 - Create a namespace and a service account
+
+Create a namespace and a service account for the OKE workloads:
 
 ```
 kubectl create ns oke-gcp-ns;
