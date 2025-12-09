@@ -68,7 +68,7 @@ Documentation: [OpenID Connect Discovery - Oracle Cloud Infrastructure Docs](htt
 ```
 kubectl create ns oke-gcp-ns;
 kubectl -n oke-gcp-ns create sa oke-gcp-sa;
-``
+```
 
 ## 2 - Prepare GCP resources
 
