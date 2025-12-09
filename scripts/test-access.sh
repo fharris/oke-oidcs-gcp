@@ -25,6 +25,10 @@ echo_error() {
 POD_NAME=${1:-gcp-test-pod}
 NAMESPACE=${2:-default}
 
+# Get the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
 echo_info "Testing GCP access from OKE pod: ${POD_NAME}"
 
 # Check if pod exists

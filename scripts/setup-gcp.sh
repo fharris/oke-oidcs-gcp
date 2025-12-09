@@ -131,8 +131,7 @@ create_gcp_service_account() {
     echo_info "Granting Storage Object Viewer role..."
     gcloud projects add-iam-policy-binding ${PROJECT_ID} \
         --member="serviceAccount:${GSA_EMAIL}" \
-        --role="roles/storage.objectViewer" \
-        --condition=None
+        --role="roles/storage.objectViewer"
 }
 
 # Bind K8s SA to GCP SA

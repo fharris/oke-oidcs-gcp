@@ -60,6 +60,9 @@ resource "google_project_iam_member" "workload_storage_viewer" {
 }
 
 # Allow Kubernetes service accounts to impersonate the GCP service account
+# Note: This binds a specific namespace. To support multiple namespaces, create additional
+# google_service_account_iam_member resources or use a wildcard in the OIDC provider's
+# attribute condition instead of binding specific namespaces here.
 resource "google_service_account_iam_member" "workload_identity_binding" {
   service_account_id = google_service_account.oke_workload.name
   role               = "roles/iam.workloadIdentityUser"

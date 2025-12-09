@@ -91,9 +91,12 @@ ls: /var/run/secrets/tokens/gcp-ksa: No such file or directory
 Authentication fails even though token is mounted
 
 **Solutions:**
-1. Decode and inspect the token:
+1. Decode and inspect the token (JWT tokens are not base64 encoded, they are already readable):
    ```bash
-   kubectl exec gcp-test-pod -- cat /var/run/secrets/tokens/gcp-ksa | base64 -d
+   # View the raw JWT token (it's already readable text)
+   kubectl exec gcp-test-pod -- cat /var/run/secrets/tokens/gcp-ksa
+   
+   # To properly decode JWT claims, use a tool like jwt-cli or online JWT decoder
    ```
 
 2. Verify these claims are present:
@@ -102,9 +105,11 @@ Authentication fails even though token is mounted
    - `kubernetes.io/serviceaccount/name`: Service account name
    - `aud`: Audience (should be `sts.googleapis.com`)
 
-3. Check token expiration:
+3. Check token expiration (requires jq to be installed in pod):
    ```bash
-   kubectl exec gcp-test-pod -- cat /var/run/secrets/tokens/gcp-ksa | cut -d'.' -f2 | base64 -d | jq .exp
+   # Note: JWT tokens use base64url encoding, not standard base64
+   # You may need to install jwt-cli or similar tool for proper decoding
+   kubectl exec gcp-test-pod -- sh -c 'cat /var/run/secrets/tokens/gcp-ksa | cut -d. -f2 | base64 -d 2>/dev/null || echo "Token format may require base64url decoding"'
    ```
 
 ## Authentication Failures
