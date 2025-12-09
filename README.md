@@ -74,10 +74,9 @@ kubectl -n oke-gcp-ns create sa oke-gcp-sa;
 
 We will try to run the commands with GCP CLI, but you can always try to do it in the console as well:
 
-1. GCP recommends to use a dedicated project to manage workload identity pools and providers, so lets create a GCP project with GCP Shell:
+1. GCP recommends to use a dedicated project to manage workload identity pools and providers, so lets create a GCP project :
 
 ```
-   gcloud projects create oke-oidc-gcp;
    gcloud projects create oke-oidc-gcp;
 ```
 
@@ -85,12 +84,11 @@ We will try to run the commands with GCP CLI, but you can always try to do it in
 
    Dont forget verifing that billing is enabled for your oke-oidc-gcp Google Cloud project.
 
-You can do it with gcloud
 ```
    gcloud billing projects link oke-oidc-gcp --billing-account=MY-BILLING-ACCOUNT-ID
 
 ```
-or in the console. Once done you can validate it:
+Once done you can validate it:
 
 ```
 gcloud billing projects describe oke-oidc-gcp
