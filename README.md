@@ -20,7 +20,7 @@ First thing to acknowledge is that we will need to prepare an OKE cluster with O
 
 ## 1. Prepare OKE to support OIDC Discovery
 
-In the OKE Documentation you can see how to create a cluster with OIDC Discovery enabled. But you can also provision a cluster without it and update it once is provisioned. 
+- 1.1 - In the OKE Documentation you can see how to create a cluster with OIDC Discovery enabled. But you can also provision a cluster without it and update it once is provisioned. 
 
 Like this if you want to do it in the console:
 
@@ -63,6 +63,13 @@ retain the **open-id-connect-discovery-endpoint** . We will need it later.
 
 Documentation: [OpenID Connect Discovery - Oracle Cloud Infrastructure Docs](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengOpenIDConnect-Discovery.htm)
 
+
+- 1.2 - Create a namespace and a service account for the OKE workloads:
+
+```
+kubectl create ns oke-gcp-ns;
+kubectl -n oke-gcp-ns create sa oke-gcp-sa;
+``
 
 ## 2 - Prepare GCP resources
 
@@ -138,15 +145,15 @@ gcloud iam service-accounts create oke-workload-sa \
   --display-name="OKE Workload Service Account"
 ```
 
-The following command grants the service account named oke-workload-sa the Storage Object Viewer role on the entire oke-oidc-gcp project. 
+The following command grants the service account named oke-workload-sa the Storage Object Admin role on the entire oke-oidc-gcp project. We should be able to create buckets and push data into the buckets:
 
 ```
   gcloud projects add-iam-policy-binding projects/oke-oidc-gcp \
   --member="serviceAccount:oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com" \
-  --role="roles/storage.objectViewer"
+  --role="roles/storage.objectAdmin"
 ```
 
-This command grants a specific Kubernetes service account (identified by its unique Workload Identity Pool member string) the permission to impersonate a particular Google Cloud service account ( oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com ). The role granted, roles/iam.workloadIdentityUser , is specifically designed for this impersonation, allowing applications running in the Kubernetes cluster (using that Kubernetes service account) to effectively "act as" the Google Cloud service account and access Google Cloud resources based on the Google Cloud service account's permissions, without needing traditional service account keys. The --condition=None explicitly states that no additional conditions are placed on this binding.
+This command grants a specific Kubernetes service account (created in point 1.2 and identified by its unique Workload Identity Pool member string) the permission to impersonate a particular Google Cloud service account ( oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com ). The role granted, roles/iam.workloadIdentityUser , is specifically designed for this impersonation, allowing applications running in the Kubernetes cluster using the oke-gcp-sa service account,) to effectively "act as" the Google Cloud service account and access Google Cloud resources based on the Google Cloud service account's permissions, without needing traditional service account keys. 
 
 ```
 gcloud iam service-accounts add-iam-policy-binding \
@@ -158,3 +165,90 @@ gcloud iam service-accounts add-iam-policy-binding \
 
 
 
+Now, to deploy a Kubernetes workload that can access Google Cloud resources , we need to create a credential configuration file:
+
+```
+gcloud iam workload-identity-pools create-cred-config \
+    projects/647206516842/locations/global/workloadIdentityPools/oke-pool/providers/oke-provider \
+    --service-account=oke-workload-sa@oke-oidc-gcp.iam.gserviceaccount.com \
+    --credential-source-file=/var/run/service-account/token \
+    --credential-source-type=text \
+    --sts-location=global \
+    --output-file=credential-configuration.json
+``
+
+Now, lets create some resources in GCP:
+
+```
+gcloud storage buckets create gs://oke-gcp-bucket ;
+echo "File Content" | gcloud storage cp - gs://oke-gcp-bucket/file.txt ;
+```
+
+Return to OKE and lets create the GCP credential configuration file, as a config map in our namespace oke-gcp-ns:
+
+```
+kubectl create configmap gcp-credential-configuration \
+  --from-file credential-configuration.json \
+  --namespace oke-gcp-ns
+```
+
+Create the following pod
+
+The following pod will use the  ServiceAccount oke-gcp-sa and ConfigMap gcp-credential-configuration to authenticate to Google Cloud:
+
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: oke-gcp-pod
+  namespace: oke-gcp-ns
+spec:
+  containers:
+  - name: oke-gcp-container
+    image: google/cloud-sdk:alpine
+    command: ["/bin/sh", "-c", "gcloud auth login --cred-file $GOOGLE_APPLICATION_CREDENTIALS && gcloud auth list && sleep 600"]
+    volumeMounts:
+    - name: token
+      mountPath: "/var/run/service-account"
+      readOnly: true
+    - name: workload-identity-credential-configuration
+      mountPath: "/etc/workload-identity"
+      readOnly: true
+    env:
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/etc/workload-identity/credential-configuration.json"
+  serviceAccountName: oke-gcp-sa
+  volumes:
+  - name: token
+    projected:
+      sources:
+      - serviceAccountToken:
+          audience: https://iam.googleapis.com/projects/647206516842/locations/global/workloadIdentityPools/oke-pool/providers/oke-provider
+          expirationSeconds: 3600
+          path: token
+  - name: workload-identity-credential-configuration
+    configMap:
+      name: gcp-credential-configuration
+```
+
+Once its running you can first check its logs to validate the result of the authentication process:
+
+```
+kubectl -n oke-gcp-ns logs oke-gcp-pod
+```
+
+The output expected:
+
+<img width="895" height="194" alt="image" src="https://github.com/user-attachments/assets/db3408e4-4138-4a4b-a05f-ee7b6ae5538c" />
+
+
+You can then exec into it and list your buckets:
+
+```
+kubectl exec oke-gcp-pod --namespace oke-gcp-ns -- gcloud storage ls gs://oke-gcp-bucket/
+```
+
+The output should be something like this:
+
+<img width="1064" height="45" alt="image" src="https://github.com/user-attachments/assets/147a25c5-4f84-4cdf-9abe-cbb7e45d2cd5" />
