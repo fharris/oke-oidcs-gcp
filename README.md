@@ -63,6 +63,7 @@ retain the **open-id-connect-discovery-endpoint** . We will need it later.
 Documentation: [OpenID Connect Discovery - Oracle Cloud Infrastructure Docs](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengOpenIDConnect-Discovery.htm)
 
 
+
 - 1.2 - Create a namespace and a service account for the OKE workloads:
 
 ```
@@ -246,3 +247,10 @@ kubectl exec oke-gcp-pod --namespace oke-gcp-ns -- gcloud storage ls gs://oke-gc
 The output should be something like this:
 
 <img width="1064" height="45" alt="image" src="https://github.com/user-attachments/assets/147a25c5-4f84-4cdf-9abe-cbb7e45d2cd5" />
+
+
+Hope its usefull! :D
+
+Documentation: [Workload Identity Federation with Kubernetes](https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-kubernetes#kubernetes)
+
+
