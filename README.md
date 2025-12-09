@@ -49,3 +49,12 @@ If you want to confirm, run the following command:
 oci ce cluster get --cluster-id ocid1.cluster.oc1.iad.aaaaaaaaaf______jrd  | grep -C 'open-id-connect-discovery'
 ```
 
+You should see something like the image below:
+
+<img width="1557" height="370" alt="image" src="https://github.com/user-attachments/assets/fa219535-901a-481f-93c1-f03fd59be68c" />
+
+retain the **open-id-connect-discovery-endpoint** . We will need it later.
+
+
+
+
