@@ -73,9 +73,7 @@ GCP recommends to use a dedicated project to manage workload identity pools and 
 
 Retain the PROJECT_NUMBER.
 
-## 2. enable APIs for the project
-
-Enable the IAM, Resource Manager, Service Account Credentials, and Security Token Service APIs.
+## 2. enable billing for the project
 
    Dont forget verifing that billing is enabled for your oke-oidc-gcp Google Cloud project.
 
